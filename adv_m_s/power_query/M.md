@@ -1,7 +1,7 @@
 # Power Query (M Language)
-## L2 Create Customer Dimension
 
-### Formulas
+## Formulas
+### L2 Create Customer Dimension
 We want to extract text from the Email Address and make three new columns, First Name, Last Name and Full Name. To achieve this we are going to make a helper column that will provide the position of a character that can be used as a "delimiter/separator" of the data
 
 >First we are going to create the Separator column that will tell us the position of the comma. For the name of this new column enter `Separator` as the value
@@ -27,4 +27,64 @@ We want to extract text from the Email Address and make three new columns, First
 
 ```
 =Trim.Text([First Name]) & " " & Trim.Text([Last Name])
+```
+
+### Budget Fact Table
+
+>Creating a date by combining values from multiple columns using the `Date.From()` function.
+```
+=Date.From([Column3] & [Column2])
+```
+
+>Creating a custom column using conditional statements
+```
+if Text.Length([Column3])>3 then [Column3] else [Column1] & "~" & Date.ToText([Budget Month], "MM/dd/yy")
+```
+
+### Dynamic Tables
+
+> Get the data from the Excel Workbook
+```
+let
+    FilePath = Path,  //External reference to text query = FilePath
+    FileName = Actuals_File,  /*  Wrapping */
+   
+    PathSlash = if Text.StartsWith(FilePath,"http") then "/" else "\",
+    FullPath = FilePath & (if Text.EndsWith(FilePath, PathSlash) then "" else PathSlash) & FileName,
+
+    Source = if Text.StartsWith(FilePath,"http")
+           then Excel.Workbook(Web.Contents(FullPath), null, true)
+           else Excel.Workbook(File.Contents(FullPath), null, true)
+in
+    Source
+```
+
+> Get the data from the txt/csv file
+```
+let
+    FilePath = Path,  //External reference to text query = FilePath
+    BudgetFilename= Budget_File,  /*  Wrapping comment line */
+   
+    PathSlash = if Text.StartsWith(FilePath,"http") then "/" else "\",
+    FullPath = FilePath & (if Text.EndsWith(FilePath, PathSlash) then "" else PathSlash) & BudgetFilename,
+
+
+    Source = if Text.StartsWith(FilePath,"http")
+             then Csv.Document(Web.Contents(FullPath ),[Delimiter=",", Encoding=1252, QuoteStyle=QuoteStyle.None])
+             else Csv.Document(File.Contents(FullPath),[Delimiter=",", Encoding=1252, QuoteStyle=QuoteStyle.None])							
+in
+    Source
+```
+
+> Create a custom function that can be called in a table
+```
+let
+    Source = (TransactionDate as date) => let
+        YearStart = #date(Date.Year(TransactionDate),1,1),
+        #"DateDiff" = Duration.From(TransactionDate-YearStart),
+        #"NumberDays" = Duration.Days(#"DateDiff")+1
+    in
+        #"NumberDays"
+in
+    Source
 ```
