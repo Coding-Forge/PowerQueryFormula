@@ -21,3 +21,10 @@ We want to extract text from the Email Address and make three new columns, First
 >Now that we have the `Last Name` we need to extract out the First Name from the email address. To do this we will use another substring type function. Name the following column `First Name`
 ```
 =Text.Range([Email Name.2],[Separator]+2)
+```
+
+>Now we want to create the `Full Name` column by combining the columns `First Name` and `Last Name`. When working with string values and concatenating I like to remove any whitespace before or after the string value. You can use the `Trim.Text()` function to remove all whitespace. Next, combine the two columns together using and ampersand with double quotes containing a space and another ampersand.
+
+```
+=Trim.Text([First Name]) & " " & Trim.Text([Last Name])
+```
