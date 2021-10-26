@@ -43,7 +43,15 @@ if Text.Length([Column3])>3 then [Column3] else [Column1] & "~" & Date.ToText([B
 
 ### Dynamic Tables
 
-> Get the data from the Excel Workbook
+> Get the data from the Excel Workbook. Looking at the function you can break things down into the respective variables and the call to get the data.
+<ol>
+    <li>FilePath is set to the variable Path. The value being stored in Path is the root folder for the Excel Workbook</li>
+    <li>FileName is being set to the value being stored in Actuals_File, which is the Excel Workbook</li>
+    <li>PathSlash is a function that determines the origin of the file. If the file starts with Http then it will add the corresponding character according to the protocol required for navigating a file path on the web or locally</li>
+    <li>FullPath takes the value from FilePath, concatenates with the appropriate character for the protocol being used and appends on the FileName at the end</li>
+    <li>Last, is providing the "Source" of the data for Power BI to consume. If the FilePath has "http" then it will use Web.Contents to read the file from a URL else it will use File.Contents to read a file from a local or network drive</li>
+</ol>
+
 ```
 let
     FilePath = Path,  //External reference to text query = FilePath
@@ -59,7 +67,8 @@ in
     Source
 ```
 
-> Get the data from the txt/csv file
+> Get the data from the txt/csv file. We can take the same process from the above cell block and apply it to our txt/csv files. Now we can dynamically put into a table where all our data is coming from, and we can easily add more resources or take them away simply by adding or removing a row from the table.
+
 ```
 let
     FilePath = Path,  //External reference to text query = FilePath
@@ -76,7 +85,8 @@ in
     Source
 ```
 
-> Create a custom function that can be called in a table
+> Create a custom function that can be called in a table. This custom function is going to be used to figure out how many days have passed from the beginning of the year as provided by a date column from the table. A custom column will be created using the `invoke function` when adding an addition column. Looking at the function we can see that a "DATE" is being passed in as parameter. We are then making three variables `YearStart, DateDiff, and NumberDays`. The variable `YearStart` is extracting the year from the passed in "Date" value and recombinging it to make a new date that is the first day of the first month of the corresponding year. `DateDiff` is looking at the amount of time elapsed from the the `TransactionDate` and the `YearStart`. `NumberDays` is converting the time to actuals days and adding 1. The function is then returning the value of `NumberDays` as the source which can then be used as the response to any record that is passing in a "Date" value.
+
 ```
 let
     Source = (TransactionDate as date) => let
