@@ -1,0 +1,1 @@
+PYTD = DIVIDE(SUM('Sales'[Price])-[PY Sales],SAMEPERIODASLAST([PY Sales]))
